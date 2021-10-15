@@ -166,8 +166,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardBackground: {fileID: 8771975418155035758, guid: 19e9c792f89e6334fa04be7d8598450f,
     type: 3}
-  boardWidth: 6
-  boardHeight: 6
+  boardWidth: 3
+  boardHeight: 3
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -295,7 +295,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allPieces:
-  - {fileID: 5810422155876329375, guid: 74ba0ef478e0d76498f5df95f38096ae, type: 3}
+  - {fileID: 633305810291600159, guid: 1d1cc5a46078ad04099799e9df759b2a, type: 3}
+  - {fileID: 3089280294954002679, guid: 7efc57b4745fd04478f1df18f13dc990, type: 3}
+  - {fileID: 657973653549213727, guid: e0c49d62f1d722540a78b3893bf214b6, type: 3}
   allMaterials:
   - {fileID: 2100000, guid: 5c81f312c5a14e245816e9262b2f3a88, type: 2}
   - {fileID: 2100000, guid: e7d59e4c1ffb859458c72bb98f61a9cc, type: 2}

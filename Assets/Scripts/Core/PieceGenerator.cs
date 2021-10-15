@@ -7,13 +7,19 @@ public class PieceGenerator : MonoBehaviour
     BoardManager boardManager;
 
     List<PieceBehaviour> allPieces = new List<PieceBehaviour>() { }; //Pieces that will be chosen for filling board
-    List<PieceBehaviour> spawnedPieces = new List<PieceBehaviour>(); //Chosen pieces
+    List<PieceBehaviour> spawnedPieces; //Chosen pieces
     PieceBehaviour spawnedPiece; //Current spawmed piece
+
+    List<PastChoices> pastChoices;
+    List<GameObject> instantiatedObjects = new List<GameObject>();
 
     Cell[,] c;//Cell
     int cellHeight, cellWidth;
 
-    int crash = 0; //To prevent infinite loop
+    int loopCounter = 0; //To prevent infinite loop
+    int secondLoopCounter = 0;
+    bool boardFilled = false; //Pieces procedurally generated
+    bool infiniteLoop = false;
 
     void LoadCells() //Load cells with empty fill rate
     {
@@ -40,40 +46,67 @@ public class PieceGenerator : MonoBehaviour
     {
         do
         {
-            crash++;
             do
             {
-                crash++;
+                loopCounter++;
                 spawnedPiece = new PieceBehaviour(allPieces[Random.Range(0, allPieces.Count)]); //New piecebehaviour class loaded
                 spawnedPiece.location = new Vector2Int(Random.Range(0, cellHeight), Random.Range(0, cellWidth)); //Lets try to give it a location in board
-            } while (!IsCellsAvailable() && Crashed("1. crash")); //Lets check if it can fit inside board without any trouble
-            spawnedPieces.Add(spawnedPiece); //We will spawn it
-            FillCells(); //Fill cells according to spawned piece's filled cells
-        } while (!IsBoardFilled() && Crashed("2. crash")); //Repeat until board is filled
-        Debug.Log("Board Filled");
+                pastChoices.Add(new PastChoices(spawnedPiece)); //Lets not repeat the same mistakes
+            } while (!IsCellsAvailable() && Crashed()); //Lets check if it can fit inside board without any trouble
+            if (!infiniteLoop)
+            {
+                loopCounter = 0;
+                spawnedPieces.Add(spawnedPiece); //We will spawn it
+                FillCells(); //Fill cells according to spawned piece's filled cells
+            }
+        } while (!IsBoardFilled() && !infiniteLoop); //Repeat until board is filled
     }
 
     void SpawnPieces()
     {
-        GameObject tempObject;
         PieceBehaviour tempPiece;
         foreach (PieceBehaviour piece in spawnedPieces)
         {
-            tempObject = Instantiate(pieceManager.allPieces[piece.id], boardManager.GetPositionByLocation(piece.location[0], piece.location[1]), Quaternion.identity); //Spawn pieces to cell's location (This is for test now, pieces won be located at cell's positions)
-            tempPiece = tempObject.GetComponent<PieceBehaviour>();
+            instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], boardManager.GetPositionByLocation(piece.location[0], piece.location[1]), Quaternion.identity)); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
+            tempPiece = instantiatedObjects[instantiatedObjects.Count - 1].GetComponent<PieceBehaviour>();
             tempPiece.ChangeValues(piece);
             tempPiece.ChangeMaterial(pieceManager.allMaterials[Random.Range(0, pieceManager.allMaterials.Count)]); //Change their material
         }
+    }
+
+    void LoadGame()
+    {
+        loopCounter = 0;
+        infiniteLoop = false;
+        foreach (GameObject o in instantiatedObjects) //Remove old objects from scene
+        {
+            Destroy(o);
+        }
+
+        instantiatedObjects = new List<GameObject>();
+        pastChoices = new List<PastChoices>();
+        spawnedPieces = new List<PieceBehaviour>();
+
+        LoadCells();
+        ChoosePieces();
+        SpawnPieces();
+
+        if (secondLoopCounter > 10 || boardFilled)
+        {
+            return;
+        }
+        else
+            LoadGame(); //We failed to generate pieces that can fit to board (Maybe it's just because of first piece's wrong location, but we have to try again)
+
+        secondLoopCounter++;
     }
 
     void Start()
     {
         pieceManager = PieceManager.GetInstance();
         boardManager = BoardManager.GetInstance();
-        LoadCells();
         LoadPieces();
-        ChoosePieces();
-        SpawnPieces();
+        LoadGame();
     }
 
 
@@ -83,16 +116,17 @@ public class PieceGenerator : MonoBehaviour
         {
             for (int j = 0; j < GlobalAttributes.cellSectionCount; j++)
             {
-                c[spawnedPiece.location[0] + spawnedPiece.filledCellLocations[i][0], spawnedPiece.location[1] + spawnedPiece.filledCellLocations[i][1]].fillRate[j] = (int)spawnedPiece.filledCellRates[i][j];
+                if ((int)spawnedPiece.filledCellCount[i][j] == 1) //Dont change cell value to 0
+                    c[spawnedPiece.location[0] + spawnedPiece.filledCellLocations[i][0], spawnedPiece.location[1] + spawnedPiece.filledCellLocations[i][1]].fillRate[j] = (int)spawnedPiece.filledCellCount[i][j];
             }
         }
     }
 
-    bool Crashed(string a)
+    bool Crashed()
     {
-        if (crash > 1000)
+        if (loopCounter > 100)
         {
-            Debug.Log(a);
+            infiniteLoop = true;
             return false;
         }
         else
@@ -110,11 +144,27 @@ public class PieceGenerator : MonoBehaviour
                         return false;
             }
         }
+        boardFilled = true;
+        Debug.Log("Board Filled");
         return true;
+    }
+
+    bool AlreadyTried()
+    {
+        for (int i = 0; i < pastChoices.Count - 1; i++) //Dont check last added choice
+        {
+            if (pastChoices[i].IsTriedAlready(spawnedPiece))
+                return true;
+        }
+        return false;
     }
 
     bool IsCellsAvailable()
     {
+        if (AlreadyTried()) //We dont need to check for anything else we already tried it
+        {
+            return false;
+        }
         for (int i = 0; i < spawnedPiece.bordersOfPiece.Count; i++)
         {
             if (spawnedPiece.bordersOfPiece[i][0] + spawnedPiece.location[0] >= cellHeight || spawnedPiece.bordersOfPiece[i][0] + spawnedPiece.location[0] < 0) //Inside board
@@ -130,9 +180,12 @@ public class PieceGenerator : MonoBehaviour
         {
             for (int j = 0; j < GlobalAttributes.cellSectionCount; j++)
             {
-                if (c[spawnedPiece.location[0] + spawnedPiece.filledCellLocations[i][0], spawnedPiece.location[1] + spawnedPiece.filledCellLocations[i][1]].fillRate[j] == 1) //Cell available
+                if (spawnedPiece.filledCellCount[i][j] == 1) //Check cell filling only if you can also fill there
                 {
-                    return false;
+                    if (c[spawnedPiece.location[0] + spawnedPiece.filledCellLocations[i][0], spawnedPiece.location[1] + spawnedPiece.filledCellLocations[i][1]].fillRate[j] == spawnedPiece.filledCellCount[i][j]) //Cell available
+                    {
+                        return false;
+                    }
                 }
             }
         }
