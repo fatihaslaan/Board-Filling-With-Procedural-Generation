@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class PieceManager : MonoBehaviour
 {
-    public List<GameObject> allPieces;
+    public List<GameObject> allPieces; //Piece objects
+    public List<Material> allMaterials; //Materials for objects
 
     static PieceManager instance;
 
