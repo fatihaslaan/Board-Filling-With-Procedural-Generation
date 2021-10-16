@@ -125,12 +125,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0080d06a8e0e5e74d9019dc09a43d9c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 0
+  id: 3
   rotation: 0
   location: {x: 0, y: 0}
   filledCellLocations:
   - {x: 0, y: 0}
-  filledCellRates:
+  filledCellCount:
   - {x: 1, y: 1, z: 1, w: 1}
   bordersOfPiece:
   - {x: 0, y: 0}

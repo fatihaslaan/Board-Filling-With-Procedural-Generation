@@ -10,6 +10,7 @@ public class PieceBehaviour : MonoBehaviour
     public Vector2Int location = new Vector2Int(); //Piece location
 
     public List<Vector2Int> filledCellLocations = new List<Vector2Int>(); //Filled cells of current piece
+    public List<Vector2Int> triangleCellLocations = new List<Vector2Int>(); //Filled cells of current piece
     public List<Vector4> filledCellCount = new List<Vector4>(); //Filled cells of current piece
 
     public List<Vector2Int> bordersOfPiece = new List<Vector2Int>(); //Borders of piece
@@ -25,6 +26,7 @@ public class PieceBehaviour : MonoBehaviour
         rotation = p.rotation;
         location = p.location;
         filledCellLocations = p.filledCellLocations;
+        triangleCellLocations = p.triangleCellLocations;
         filledCellCount = p.filledCellCount;
         bordersOfPiece = p.bordersOfPiece;
     }

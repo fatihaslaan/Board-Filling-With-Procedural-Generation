@@ -166,8 +166,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardBackground: {fileID: 8771975418155035758, guid: 19e9c792f89e6334fa04be7d8598450f,
     type: 3}
-  boardWidth: 3
-  boardHeight: 3
+  boardWidth: 6
+  boardHeight: 6
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
