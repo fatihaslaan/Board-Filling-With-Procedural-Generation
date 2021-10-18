@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0080d06a8e0e5e74d9019dc09a43d9c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 1
+  id: 14
   rotation: 0
   location: {x: 0, y: 0}
   filledCellLocations:
@@ -76,7 +76,7 @@ GameObject:
   - component: {fileID: 3089280295412288960}
   - component: {fileID: 3089280295412288967}
   m_Layer: 0
-  m_Name: Square 15
+  m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -157,7 +157,7 @@ GameObject:
   - component: {fileID: 3089280295438516418}
   - component: {fileID: 3089280295438516417}
   m_Layer: 0
-  m_Name: Triangle 15
+  m_Name: Triangle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 3089280295592571080}
   - component: {fileID: 3089280295592571087}
   m_Layer: 0
-  m_Name: Square 15
+  m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -319,7 +319,7 @@ GameObject:
   - component: {fileID: 3089280296073287278}
   - component: {fileID: 3089280296073287277}
   m_Layer: 0
-  m_Name: Triangle 15
+  m_Name: Triangle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -400,7 +400,7 @@ GameObject:
   - component: {fileID: 3089280296458748093}
   - component: {fileID: 3089280296458748092}
   m_Layer: 0
-  m_Name: Square 15
+  m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

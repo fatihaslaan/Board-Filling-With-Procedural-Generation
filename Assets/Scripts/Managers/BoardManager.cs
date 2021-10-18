@@ -23,13 +23,13 @@ public class BoardManager : MonoBehaviour
 
     void LoadCells()
     {
-        cellPositions = new Vector3[boardHeight, boardWidth];
-        for (int i = -boardHeight / 2; i < boardHeight - (boardHeight / 2); i++)
+        cellPositions = new Vector3[boardWidth, boardHeight];
+        for (int i = -boardWidth / 2; i < boardWidth - (boardWidth / 2); i++)
         {
-            for (int j = -boardWidth / 2; j < boardWidth - (boardWidth / 2); j++)
+            for (int j = -boardHeight / 2; j < boardHeight - (boardHeight / 2); j++)
             {
-                cellPositions[i + (boardHeight / 2), j + (boardWidth / 2)] = new Vector3((1.25f * i), 3.75f + (j * 1.25f), 0.1f);
-                Instantiate(boardBackground, cellPositions[i + (boardHeight / 2), j + (boardWidth / 2)], Quaternion.identity); //Instantiate cells to scene
+                cellPositions[i + (boardWidth / 2), j + (boardHeight / 2)] = new Vector3((1.25f * i), 3.75f + (j * 1.25f), 0.1f);
+                Instantiate(boardBackground, cellPositions[i + (boardWidth / 2), j + (boardHeight / 2)], Quaternion.identity); //Instantiate cells to scene
             }
         }
     }

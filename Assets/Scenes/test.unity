@@ -166,8 +166,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardBackground: {fileID: 8771975418155035758, guid: 19e9c792f89e6334fa04be7d8598450f,
     type: 3}
-  boardWidth: 4
-  boardHeight: 4
+  boardWidth: 3
+  boardHeight: 3
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -295,25 +295,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allPieces:
-  - {fileID: 5810422155876329375, guid: 74ba0ef478e0d76498f5df95f38096ae, type: 3}
-  - {fileID: 8470923906145599716, guid: 2899f3836baf091448b3a991b371b1d4, type: 3}
-  - {fileID: 3031863923130821393, guid: 4c5501818fb8c234c98aa6a9b11ffef9, type: 3}
-  - {fileID: 5992375459293856275, guid: 4426d3d7600ded44bb7a495296a08878, type: 3}
-  - {fileID: 5856229349519705891, guid: adb89a2a5130fd040889fd7cf8dcedba, type: 3}
-  - {fileID: 3920486563871049467, guid: cff6a307d3c2c8f45835edaead288502, type: 3}
-  - {fileID: 2231539587560443216, guid: 687bf94fb940d2041bcee661a40f4e54, type: 3}
-  - {fileID: 5346349877993127364, guid: 6590d9b6713804f47a4f55b0d97e49e0, type: 3}
-  - {fileID: 1021547583366258549, guid: 76934a5b98bea4f448cf793a9c71e871, type: 3}
-  - {fileID: 2279861131794777463, guid: 6113c324f73ae75428d527b3727c1e89, type: 3}
-  - {fileID: 7786046423803543278, guid: 1cbae09d27084b546bbfb78a0a099bdb, type: 3}
-  - {fileID: 4437921059212140831, guid: 8ebe4b9995ce64f44901311be8a2a16e, type: 3}
-  - {fileID: 1152942239593723055, guid: d1d142e077ac2d44d8f4207d4e24e300, type: 3}
-  - {fileID: 633305810291600159, guid: 1d1cc5a46078ad04099799e9df759b2a, type: 3}
-  - {fileID: 3089280294954002679, guid: 7efc57b4745fd04478f1df18f13dc990, type: 3}
-  - {fileID: 657973653549213727, guid: e0c49d62f1d722540a78b3893bf214b6, type: 3}
-  - {fileID: 4688239850451295663, guid: 4b7ff65c5a61f66468b260256fc4ba3a, type: 3}
-  - {fileID: 6963232857413629973, guid: 2f05aa7148a7ba2468e9fe8fc6e2a167, type: 3}
-  - {fileID: 8199508353354515220, guid: db502aefd6acd304eb74d467e65beb1a, type: 3}
+  - {fileID: 2092381307564451562, guid: 91d81c9b6ca71bb4e9c2a31072efebc7, type: 3}
+  - {fileID: 1281830548097832139, guid: 595d514b92368df4ea8417d39fdc6913, type: 3}
+  - {fileID: 6976021332140084835, guid: e6381c7d2be117140b6ad639f3b2d0b0, type: 3}
+  - {fileID: 1922980229596853809, guid: 88ebf97bd9022ac4bb568d6a573c7823, type: 3}
   allMaterials:
   - {fileID: 2100000, guid: 5c81f312c5a14e245816e9262b2f3a88, type: 2}
   - {fileID: 2100000, guid: e7d59e4c1ffb859458c72bb98f61a9cc, type: 2}
