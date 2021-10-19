@@ -91,6 +91,7 @@ GameObject:
   m_Component:
   - component: {fileID: 366724450965081797}
   - component: {fileID: 7367620795114631159}
+  - component: {fileID: 9090939715917620596}
   m_Layer: 0
   m_Name: Piece 13 (Center)
   m_TagString: Untagged
@@ -146,6 +147,32 @@ MonoBehaviour:
   - {x: 0, y: 1, z: 1, w: 0}
   bordersOfPiece:
   - {x: 1, y: -1}
+--- !u!61 &9090939715917620596
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152942239593723055}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.596534, y: -0.49427128}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 2.193068, y: 1.9885426}
+  m_EdgeRadius: 0
 --- !u!1 &2451010564729015729
 GameObject:
   m_ObjectHideFlags: 0

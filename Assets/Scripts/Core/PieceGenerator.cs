@@ -84,7 +84,7 @@ public class PieceGenerator : MonoBehaviour
                 if (spawnedPiece.triangleCellLocations.Count == 0)
                 {
                     spawnedPieces.Add(spawnedPiece); //We will spawn it
-                    FillCells(cell, spawnedPiece); //Fill cells according to spawned piece's filled cells
+                    GlobalAttributes.FillCells(cell, spawnedPiece); //Fill cells according to spawned piece's filled cells
                 }
             }
             if (spawnedPieces.Count >= 12)
@@ -97,7 +97,8 @@ public class PieceGenerator : MonoBehaviour
         PieceBehaviour tempPiece;
         foreach (PieceBehaviour piece in spawnedPieces)
         {
-            instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], boardManager.GetPositionByLocation(piece.location[0], piece.location[1]), Quaternion.Euler(0, 0, piece.rotation * -90))); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
+            instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], new Vector3(Random.Range(-3f, 3f), Random.Range(-2f, -5f), 0) /*boardManager.GetPositionByLocation(piece.location[0], piece.location[1])*/, Quaternion.Euler(0, 0, piece.rotation * -90))); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
+            instantiatedObjects[instantiatedObjects.Count - 1].AddComponent<PieceLocator>();
             tempPiece = instantiatedObjects[instantiatedObjects.Count - 1].GetComponent<PieceBehaviour>();
             tempPiece.ChangeValues(piece);
             tempPiece.ChangeMaterial(pieceManager.allMaterials[Random.Range(0, pieceManager.allMaterials.Count)]); //Change their material
@@ -133,20 +134,6 @@ public class PieceGenerator : MonoBehaviour
         LoadGame();
     }
 
-    void FillCells(Cell[,] c, PieceBehaviour piece)
-    {
-        for (int i = 0; i < piece.filledCellLocations.Count; i++)
-        {
-            for (int j = 0; j < GlobalAttributes.cellSectionCount; j++)
-            {
-                if ((int)piece.filledCellCount[i][j] == 1) //Dont change cell value to 0
-                {
-                    c[piece.location[0] + piece.filledCellLocations[i][0], piece.location[1] + piece.filledCellLocations[i][1]].fillRate[j] = (int)piece.filledCellCount[i][j];
-                }
-            }
-        }
-    }
-
     bool AlreadyConnectedWithPiece(PieceBehaviour piece, int index)
     {
         for (int j = 0; j < GlobalAttributes.cellSectionCount; j++)
@@ -172,7 +159,7 @@ public class PieceGenerator : MonoBehaviour
         PieceBehaviour temp;
         for (int j = 0; j < piecesWithTriangle.Count; j++)
         {
-            for (int z = 0; z < piecesWithTriangle[j].triangleCellLocations.Count; z++) //NOTE: add rotate
+            for (int z = 0; z < piecesWithTriangle[j].triangleCellLocations.Count; z++)
             {
                 for (int r = 0; r < 4; r++)
                 {
@@ -202,7 +189,7 @@ public class PieceGenerator : MonoBehaviour
                 }
                 else
                 {
-                    FillCells(tempCell, piece);
+                    GlobalAttributes.FillCells(tempCell, piece);
                     pastChoices.Add(new PastChoices(piece));
                     if (IsItConnectsWithSelectedPiece(piece, i))
                     {
@@ -233,18 +220,13 @@ public class PieceGenerator : MonoBehaviour
 
     bool IsBoardFilled()
     {
-        for (int i = 0; i < cellWidth; i++)
+        if (GlobalAttributes.IsBoardFilled(cell))
         {
-            for (int j = 0; j < cellHeight; j++)
-            {
-                for (int z = 0; z < GlobalAttributes.cellSectionCount; z++)
-                    if (cell[i, j].fillRate[z] == 0)
-                        return false;
-            }
+            boardFilled = true;
+            Debug.Log("Pieces That Can Fill The Board Is Generated");
+            return true;
         }
-        boardFilled = true;
-        Debug.Log("Board Filled");
-        return true;
+        return false;
     }
 
     bool AlreadyTried(PieceBehaviour piece)
@@ -265,7 +247,6 @@ public class PieceGenerator : MonoBehaviour
             if (!IsPieceWithTrianglePlaceable(spawnedPiece))
             {
                 tempSpawnedPieces = new List<PieceBehaviour>();
-                CopyCells();
                 return false;
             }
             else
@@ -274,7 +255,7 @@ public class PieceGenerator : MonoBehaviour
                 {
                     foreach (PieceBehaviour piece in tempSpawnedPieces)
                     {
-                        FillCells(cell, piece);
+                        GlobalAttributes.FillCells(cell, piece);
                         spawnedPieces.Add(piece);
                     }
                 }
@@ -292,16 +273,9 @@ public class PieceGenerator : MonoBehaviour
         {
             return false;
         }
-        for (int i = 0; i < piece.bordersOfPiece.Count; i++)
+        if (!GlobalAttributes.IsInsideBoard(piece, cellWidth, cellHeight))
         {
-            if (piece.bordersOfPiece[i][0] + piece.location[0] >= cellWidth || piece.bordersOfPiece[i][0] + piece.location[0] < 0 || piece.location[0] < 0 || piece.location[0] >= cellWidth) //Inside board
-            {
-                return false;
-            }
-            if (piece.bordersOfPiece[i][1] + piece.location[1] >= cellHeight || piece.bordersOfPiece[i][1] + piece.location[1] < 0 || piece.location[1] < 0 || piece.location[1] >= cellHeight)
-            {
-                return false;
-            }
+            return false;
         }
         for (int i = 0; i < piece.filledCellLocations.Count; i++)
         {
