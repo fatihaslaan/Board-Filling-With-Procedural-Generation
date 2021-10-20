@@ -40,7 +40,7 @@ public class PieceLocator : MonoBehaviour
         {
             for (int j = 0; j < board.boardHeight; j++)
             {
-                if (Vector3.Distance(transform.position, board.GetPositionByLocation(i, j)) < 0.5f) //Piece is close to a cell
+                if (Vector3.Distance(transform.position, board.GetPositionByLocation(i, j)) < 0.75f) //Piece is close to a cell
                 {
                     piece.location[0] = i;
                     piece.location[1] = j;
@@ -50,6 +50,7 @@ public class PieceLocator : MonoBehaviour
                         transform.position = board.GetPositionByLocation(i, j);
                         if (IsGameOver())
                         {
+                            GlobalAttributes.currentLevel++;
                             Debug.Log("Game over");
                             SceneManager.LoadScene(0);
                         }

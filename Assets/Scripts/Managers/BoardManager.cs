@@ -4,7 +4,11 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     public GameObject boardBackground; //Board background object
+    [HideInInspector]
     public int boardWidth, boardHeight; //Change board width and height
+    public int maxBoardWidth, maxBoardHeight;
+    public int minBoardWidth, minBoardHeight;
+    public int maxPieceCount, minPieceCount;
     public Cell[,] boardCells;
     public List<PieceLocator> selectedPieces = new List<PieceLocator>();
 
@@ -21,6 +25,8 @@ public class BoardManager : MonoBehaviour
         else
         {
             instance = this;
+            boardWidth = Random.Range(minBoardWidth, maxBoardWidth + 1);
+            boardHeight = Random.Range(minBoardHeight, maxBoardHeight + 1);
             LoadCells();
         }
     }

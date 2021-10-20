@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PieceGenerator : MonoBehaviour
@@ -6,7 +7,7 @@ public class PieceGenerator : MonoBehaviour
     PieceManager pieceManager;
     BoardManager boardManager;
 
-    List<PieceBehaviour> allPieces = new List<PieceBehaviour>() { }; //Pieces that will be chosen for filling board
+    List<PieceBehaviour> piecesWithoutTriangle = new List<PieceBehaviour>() { }; //Pieces that will be chosen for filling board
     List<PieceBehaviour> piecesWithTriangle = new List<PieceBehaviour>() { }; //Pieces with triangle shape
     List<PieceBehaviour> spawnedPieces; //Chosen pieces
     List<PieceBehaviour> tempSpawnedPieces = new List<PieceBehaviour>(); //Chosen pieces
@@ -25,6 +26,7 @@ public class PieceGenerator : MonoBehaviour
     bool boardFilled = false; //Pieces procedurally generated
     bool infiniteLoop = false;
     bool cellsAvailable = false;
+    int randomPiece = 0;
 
     void LoadCells() //Load cells with empty fill rate
     {
@@ -60,9 +62,11 @@ public class PieceGenerator : MonoBehaviour
         foreach (GameObject o in pieceManager.allPieces) //Get available pieces to fill the board
         {
             temp = o.GetComponent<PieceBehaviour>();
-            allPieces.Add(temp);
             if (temp.triangleCellLocations.Count > 0)
                 piecesWithTriangle.Add(temp);
+            else
+                piecesWithoutTriangle.Add(temp);
+
         }
     }
 
@@ -73,10 +77,21 @@ public class PieceGenerator : MonoBehaviour
             do
             {
                 loopCounter++;
-                spawnedPiece = new PieceBehaviour(allPieces[Random.Range(0, allPieces.Count)]); //New piecebehaviour class loaded
+                if (Random.Range(0, 10) < 3)
+                {
+                    randomPiece = Random.Range(0, piecesWithoutTriangle.Count);
+                    spawnedPiece = new PieceBehaviour(piecesWithoutTriangle[randomPiece]); //New piecebehaviour class loaded
+                }
+                else
+                {
+                    do
+                    {
+                        randomPiece = Random.Range(0, piecesWithTriangle.Count);
+                    } while (piecesWithTriangle[randomPiece].filledCellCount.Count <= 3);
+                    spawnedPiece = new PieceBehaviour(piecesWithTriangle[randomPiece]);
+                }
                 spawnedPiece.location = new Vector2Int(Random.Range(0, cellWidth), Random.Range(0, cellHeight)); //Lets try to give it a location in board
                 spawnedPiece.ChangeRotation(Random.Range(0, 4));
-                pastChoices.Add(new PastChoices(spawnedPiece)); //Lets not repeat the same mistakes
             } while (!IsPiecePlaceable() && Crashed()); //Lets check if it can fit inside board without any trouble
             if (!infiniteLoop)
             {
@@ -87,22 +102,32 @@ public class PieceGenerator : MonoBehaviour
                     GlobalAttributes.FillCells(cell, spawnedPiece); //Fill cells according to spawned piece's filled cells
                 }
             }
-            if (spawnedPieces.Count >= 12)
+            if (spawnedPieces.Count >= boardManager.maxPieceCount)
                 infiniteLoop = true;
         } while (!IsBoardFilled() && !infiniteLoop); //Repeat until board is filled
     }
 
-    void SpawnPieces()
+    void SaveSelectedPieces()
     {
-        PieceBehaviour tempPiece;
-        foreach (PieceBehaviour piece in spawnedPieces)
+        // PieceBehaviour tempPiece;
+        // foreach (PieceBehaviour piece in spawnedPieces)
+        // {
+        //     instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], new Vector3(Random.Range(-3f, 3f), Random.Range(-2f, -5f), 0) /*boardManager.GetPositionByLocation(piece.location[0], piece.location[1])*/, Quaternion.Euler(0, 0, piece.rotation * -90))); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
+        //     instantiatedObjects[instantiatedObjects.Count - 1].AddComponent<PieceLocator>();
+        //     tempPiece = instantiatedObjects[instantiatedObjects.Count - 1].GetComponent<PieceBehaviour>();
+        //     tempPiece.ChangeValues(piece);
+        //     tempPiece.ChangeMaterial(pieceManager.allMaterials[Random.Range(0, pieceManager.allMaterials.Count)]); //Change their material
+        // }
+        LevelData newLevel = new LevelData();
+        newLevel.selectedPieceIds = new int[spawnedPieces.Count];
+        newLevel.selectedPieceRotations = new int[spawnedPieces.Count];
+        for (int i = 0; i < spawnedPieces.Count; i++)
         {
-            instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], new Vector3(Random.Range(-3f, 3f), Random.Range(-2f, -5f), 0) /*boardManager.GetPositionByLocation(piece.location[0], piece.location[1])*/, Quaternion.Euler(0, 0, piece.rotation * -90))); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
-            instantiatedObjects[instantiatedObjects.Count - 1].AddComponent<PieceLocator>();
-            tempPiece = instantiatedObjects[instantiatedObjects.Count - 1].GetComponent<PieceBehaviour>();
-            tempPiece.ChangeValues(piece);
-            tempPiece.ChangeMaterial(pieceManager.allMaterials[Random.Range(0, pieceManager.allMaterials.Count)]); //Change their material
+            newLevel.selectedPieceIds[i] = spawnedPieces[i].id;
+            newLevel.selectedPieceRotations[i] = spawnedPieces[i].rotation;
         }
+        GlobalAttributes.SaveLevelData(newLevel);
+        pieceManager.pieceSpawner.SetActive(true);
     }
 
     void LoadGame()
@@ -117,9 +142,11 @@ public class PieceGenerator : MonoBehaviour
         ChoosePieces();
 
         secondLoopCounter++;
-        if (secondLoopCounter > 50 || boardFilled)
+        if (secondLoopCounter > 20 || spawnedPieces.Count < boardManager.minPieceCount)
+            return;
+        if (boardFilled)
         {
-            SpawnPieces();
+            SaveSelectedPieces();
             return;
         }
         else
@@ -181,6 +208,7 @@ public class PieceGenerator : MonoBehaviour
         int counter = 0;
         if (IsCellsAvailable(tempCell, piece))
         {
+            Debug.Log(piece.id + " id " + piece.location + " loc " + piece.rotation + " rot");
             for (int i = 0; i < piece.triangleCellLocations.Count; i++)
             {
                 if (AlreadyConnectedWithPiece(piece, i))
@@ -190,7 +218,6 @@ public class PieceGenerator : MonoBehaviour
                 else
                 {
                     GlobalAttributes.FillCells(tempCell, piece);
-                    pastChoices.Add(new PastChoices(piece));
                     if (IsItConnectsWithSelectedPiece(piece, i))
                     {
                         counter++;
@@ -209,7 +236,7 @@ public class PieceGenerator : MonoBehaviour
 
     bool Crashed()
     {
-        if (loopCounter > 1500)
+        if (loopCounter > 2000)
         {
             infiniteLoop = true;
             return false;
@@ -244,15 +271,19 @@ public class PieceGenerator : MonoBehaviour
         if (spawnedPiece.triangleCellLocations.Count > 0)
         {
             CopyCells();
+            piecesWithTriangle = piecesWithTriangle.OrderByDescending(o => System.Guid.NewGuid()).ToList();
             if (!IsPieceWithTrianglePlaceable(spawnedPiece))
             {
+                Debug.Log("*************");
                 tempSpawnedPieces = new List<PieceBehaviour>();
+                pastChoices.Add(new PastChoices(spawnedPiece));
                 return false;
             }
             else
             {
-                if (spawnedPieces.Count + tempSpawnedPieces.Count <= 12)
+                if (spawnedPieces.Count + tempSpawnedPieces.Count <= boardManager.maxPieceCount)
                 {
+                    Debug.Log("Done");
                     foreach (PieceBehaviour piece in tempSpawnedPieces)
                     {
                         GlobalAttributes.FillCells(cell, piece);
@@ -263,7 +294,10 @@ public class PieceGenerator : MonoBehaviour
             }
         }
         else if (!IsCellsAvailable(cell, spawnedPiece))
+        {
+            pastChoices.Add(new PastChoices(spawnedPiece));
             return false;
+        }
         return true;
     }
 

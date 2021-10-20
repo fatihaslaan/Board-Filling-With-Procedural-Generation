@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEditor;
+using UnityEngine;
 
 public static class GlobalAttributes
 {
     public static int cellSectionCount = 4; //Cells splitted to sections for filling them with triangles
+    public static int currentLevel = 0;
 
     public static void FillCells(Cell[,] cell, PieceBehaviour piece)
     {
@@ -53,5 +56,32 @@ public static class GlobalAttributes
             }
         }
         return true;
+    }
+
+    public static LevelData GetLevelData()
+    {
+        TextAsset targetFile = Resources.Load<TextAsset>("LevelData" + currentLevel); //Load, read and return the .json data from resources folder
+        LevelData data = JsonUtility.FromJson<LevelData>(targetFile.text);
+        return data;
+    }
+
+    public static void SaveLevelData(LevelData level)
+    {
+        string path = null;
+#if UNITY_EDITOR
+        path = "Assets/Resources/LevelData" + currentLevel + ".json";
+#endif
+
+        string str = JsonUtility.ToJson(level);
+        using (FileStream fs = new FileStream(path, FileMode.Create))
+        {
+            using (StreamWriter writer = new StreamWriter(fs))
+            {
+                writer.Write(str);
+            }
+        }
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh();
+#endif
     }
 }

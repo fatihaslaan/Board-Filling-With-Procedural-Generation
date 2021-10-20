@@ -28,7 +28,6 @@ public class PieceBehaviour : MonoBehaviour
             bordersOfPiece.Add(new Vector2Int(p.bordersOfPiece[i].x, p.bordersOfPiece[i].y));
         for (int i = 0; i < p.filledCellCount.Count; i++)
             filledCellCount.Add(new Vector4(p.filledCellCount[i][0], p.filledCellCount[i][1], p.filledCellCount[i][2], p.filledCellCount[i][3]));
-        //ChangeValues(p);
     }
 
     public void ChangeValues(PieceBehaviour p)

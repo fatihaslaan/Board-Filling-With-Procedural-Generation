@@ -6,6 +6,8 @@ public class PieceManager : MonoBehaviour
     public List<GameObject> allPieces; //Piece objects
     public List<Material> allMaterials; //Materials for objects
 
+    public GameObject pieceSpawner;
+
     static PieceManager instance;
 
     void Awake()
