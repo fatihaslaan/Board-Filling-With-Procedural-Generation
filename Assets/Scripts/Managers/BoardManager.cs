@@ -6,9 +6,11 @@ public class BoardManager : MonoBehaviour
     public GameObject boardBackground; //Board background object
     [HideInInspector]
     public int boardWidth, boardHeight; //Change board width and height
-    public int maxBoardWidth, maxBoardHeight;
-    public int minBoardWidth, minBoardHeight;
+
+    //public int maxBoardWidth, maxBoardHeight;
+    //public int minBoardWidth, minBoardHeight;
     public int maxPieceCount, minPieceCount;
+
     public Cell[,] boardCells;
     public List<PieceLocator> selectedPieces = new List<PieceLocator>();
 
@@ -25,13 +27,32 @@ public class BoardManager : MonoBehaviour
         else
         {
             instance = this;
-            boardWidth = Random.Range(minBoardWidth, maxBoardWidth + 1);
-            boardHeight = Random.Range(minBoardHeight, maxBoardHeight + 1);
+
+            //DIFFICULTY
+            GlobalAttributes.levelDifficulty = Random.Range(0, 3);
+            if (GlobalAttributes.levelDifficulty == 2) //Hard
+            {
+                boardHeight = 5;
+                boardWidth = 5;
+            }
+            else
+            {
+                boardHeight = 4;
+                boardWidth = 4;
+                if (GlobalAttributes.levelDifficulty == 1) //Medium
+                    minPieceCount = 10;
+                else
+                    maxPieceCount = 10; //Easy
+            }
+
+            //boardWidth = Random.Range(minBoardWidth, maxBoardWidth + 1);
+            //boardHeight = Random.Range(minBoardHeight, maxBoardHeight + 1);
+            
             LoadCells();
         }
     }
 
-    void LoadCells()
+    void LoadCells() //Instantiate cell objects
     {
         cellPositions = new Vector3[boardWidth, boardHeight];
         boardCells = new Cell[boardWidth, boardHeight];
@@ -45,13 +66,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void FillCells()
+    public void FillCells() //Fill cells with pieces that located by player
     {
         foreach (PieceLocator p in selectedPieces)
         {
             if (p.located)
             {
-                GlobalAttributes.FillCells(boardCells, p.piece);
+                GlobalAttributes.FillCells(boardCells, p.pieceData);
             }
         }
     }
@@ -61,7 +82,7 @@ public class BoardManager : MonoBehaviour
         return instance;
     }
 
-    public Vector3 GetPositionByLocation(int x, int y)
+    public Vector3 GetPositionByCoordinates(int x, int y) //Retun the real position
     {
         return new Vector3(cellPositions[x, y].x, cellPositions[x, y].y, 0);
     }

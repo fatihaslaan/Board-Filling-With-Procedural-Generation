@@ -19,6 +19,15 @@ public class PieceManager : MonoBehaviour
         else
         {
             instance = this;
+            ChangeIds();
+        }
+    }
+
+    void ChangeIds()
+    {
+        for(int i=0;i<allPieces.Count;i++)
+        {
+            allPieces[i].GetComponent<PieceBehaviour>().id=i; //Change ids according to object order
         }
     }
 

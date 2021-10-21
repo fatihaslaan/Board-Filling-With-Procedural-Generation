@@ -9,9 +9,9 @@ public class PieceGenerator : MonoBehaviour
 
     List<PieceBehaviour> piecesWithoutTriangle = new List<PieceBehaviour>() { }; //Pieces that will be chosen for filling board
     List<PieceBehaviour> piecesWithTriangle = new List<PieceBehaviour>() { }; //Pieces with triangle shape
-    List<PieceBehaviour> spawnedPieces; //Chosen pieces
-    List<PieceBehaviour> tempSpawnedPieces = new List<PieceBehaviour>(); //Chosen pieces
-    PieceBehaviour spawnedPiece; //Current spawmed piece
+    List<PieceData> spawnedPieces; //Chosen pieces
+    List<PieceData> tempSpawnedPieces = new List<PieceData>(); //Chosen pieces
+    PieceData spawnedPiece; //Current spawmed piece
 
     List<PastChoices> pastChoices;
     List<GameObject> instantiatedObjects = new List<GameObject>();
@@ -20,12 +20,10 @@ public class PieceGenerator : MonoBehaviour
     Cell[,] tempCell;
     int cellHeight, cellWidth;
 
-    static int triangleLoopCounter = 0;
     int loopCounter = 0; //To prevent infinite loop
     int secondLoopCounter = 0;
     bool boardFilled = false; //Pieces procedurally generated
     bool infiniteLoop = false;
-    bool cellsAvailable = false;
     int randomPiece = 0;
 
     void LoadCells() //Load cells with empty fill rate
@@ -80,15 +78,15 @@ public class PieceGenerator : MonoBehaviour
                 if (Random.Range(0, 10) < 3)
                 {
                     randomPiece = Random.Range(0, piecesWithoutTriangle.Count);
-                    spawnedPiece = new PieceBehaviour(piecesWithoutTriangle[randomPiece]); //New piecebehaviour class loaded
+                    spawnedPiece = new PieceData(piecesWithoutTriangle[randomPiece]); //New piecebehaviour class loaded
                 }
                 else
                 {
                     do
                     {
                         randomPiece = Random.Range(0, piecesWithTriangle.Count);
-                    } while (piecesWithTriangle[randomPiece].filledCellCount.Count <= 3);
-                    spawnedPiece = new PieceBehaviour(piecesWithTriangle[randomPiece]);
+                    } while (piecesWithTriangle[randomPiece].filledCellCount.Count <= 1); //Try bigger pieces
+                    spawnedPiece = new PieceData(piecesWithTriangle[randomPiece]);
                 }
                 spawnedPiece.location = new Vector2Int(Random.Range(0, cellWidth), Random.Range(0, cellHeight)); //Lets try to give it a location in board
                 spawnedPiece.ChangeRotation(Random.Range(0, 4));
@@ -96,28 +94,22 @@ public class PieceGenerator : MonoBehaviour
             if (!infiniteLoop)
             {
                 loopCounter = 0;
-                if (spawnedPiece.triangleCellLocations.Count == 0)
+                if (spawnedPiece.triangleCellLocations.Count == 0) //Only add pieces without triangle faces (We already added pieces with triangles)
                 {
                     spawnedPieces.Add(spawnedPiece); //We will spawn it
                     GlobalAttributes.FillCells(cell, spawnedPiece); //Fill cells according to spawned piece's filled cells
                 }
             }
             if (spawnedPieces.Count >= boardManager.maxPieceCount)
+            {
+                Debug.Log("BOARD IS TOO BIG FOR THE PIECES WE CREATED");
                 infiniteLoop = true;
+            }
         } while (!IsBoardFilled() && !infiniteLoop); //Repeat until board is filled
     }
 
     void SaveSelectedPieces()
     {
-        // PieceBehaviour tempPiece;
-        // foreach (PieceBehaviour piece in spawnedPieces)
-        // {
-        //     instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], new Vector3(Random.Range(-3f, 3f), Random.Range(-2f, -5f), 0) /*boardManager.GetPositionByLocation(piece.location[0], piece.location[1])*/, Quaternion.Euler(0, 0, piece.rotation * -90))); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
-        //     instantiatedObjects[instantiatedObjects.Count - 1].AddComponent<PieceLocator>();
-        //     tempPiece = instantiatedObjects[instantiatedObjects.Count - 1].GetComponent<PieceBehaviour>();
-        //     tempPiece.ChangeValues(piece);
-        //     tempPiece.ChangeMaterial(pieceManager.allMaterials[Random.Range(0, pieceManager.allMaterials.Count)]); //Change their material
-        // }
         LevelData newLevel = new LevelData();
         newLevel.selectedPieceIds = new int[spawnedPieces.Count];
         newLevel.selectedPieceRotations = new int[spawnedPieces.Count];
@@ -128,26 +120,45 @@ public class PieceGenerator : MonoBehaviour
         }
         GlobalAttributes.SaveLevelData(newLevel);
         pieceManager.pieceSpawner.SetActive(true);
+
+        //TEST TO SEE IF BOARD FILLED CORRECTLY
+
+        // PieceBehaviour tempPiece;
+        // foreach (PieceData piece in spawnedPieces)
+        // {
+        //     instantiatedObjects.Add(Instantiate(pieceManager.allPieces[piece.id], boardManager.GetPositionByCoordinates(piece.location[0], piece.location[1]), Quaternion.Euler(0, 0, piece.rotation * -90))); //Spawn pieces to cell's location (This is for test for now, pieces wont be located at cell's positions)
+        //     instantiatedObjects[instantiatedObjects.Count - 1].AddComponent<PieceLocator>();
+        //     tempPiece = instantiatedObjects[instantiatedObjects.Count - 1].GetComponent<PieceBehaviour>();
+        //     tempPiece.ChangeMaterial(pieceManager.allMaterials[Random.Range(0, pieceManager.allMaterials.Count)]); //Change their material
+        // }
     }
 
     void LoadGame()
     {
         loopCounter = 0;
         infiniteLoop = false;
+        boardFilled = false;
 
         pastChoices = new List<PastChoices>();
-        spawnedPieces = new List<PieceBehaviour>();
+        spawnedPieces = new List<PieceData>();
 
         LoadCells();
         ChoosePieces();
 
         secondLoopCounter++;
-        if (secondLoopCounter > 20 || spawnedPieces.Count < boardManager.minPieceCount)
+        if (secondLoopCounter > 200)
             return;
         if (boardFilled)
         {
-            SaveSelectedPieces();
-            return;
+            if (spawnedPieces.Count < boardManager.minPieceCount)
+            {
+                LoadGame();
+            }
+            else
+            {
+                SaveSelectedPieces();
+                return;
+            }
         }
         else
             LoadGame(); //We failed to generate pieces that can fit to board (Maybe it's just because of first piece's wrong location, but we have to try again)
@@ -161,7 +172,7 @@ public class PieceGenerator : MonoBehaviour
         LoadGame();
     }
 
-    bool AlreadyConnectedWithPiece(PieceBehaviour piece, int index)
+    bool AlreadyConnectedWithPiece(PieceData piece, int index)
     {
         for (int j = 0; j < GlobalAttributes.cellSectionCount; j++)
         {
@@ -181,16 +192,16 @@ public class PieceGenerator : MonoBehaviour
         return true;
     }
 
-    bool IsItConnectsWithSelectedPiece(PieceBehaviour piece, int index)
+    bool IsItConnectsWithSelectedPiece(PieceData piece, int index)
     {
-        PieceBehaviour temp;
-        for (int j = 0; j < piecesWithTriangle.Count; j++)
+        PieceData temp;
+        for (int j = 0; j < piecesWithTriangle.Count; j++) //Check all pieces with triangles
         {
             for (int z = 0; z < piecesWithTriangle[j].triangleCellLocations.Count; z++)
             {
-                for (int r = 0; r < 4; r++)
+                for (int r = 0; r < 4; r++) //Try with different rotation
                 {
-                    temp = new PieceBehaviour(piecesWithTriangle[j]);
+                    temp = new PieceData(piecesWithTriangle[j]);
                     temp.ChangeRotation(r);
                     temp.location = new Vector2Int(piece.location[0] + piece.triangleCellLocations[index][0] - temp.triangleCellLocations[z][0], piece.location[1] + piece.triangleCellLocations[index][1] - temp.triangleCellLocations[z][1]); //Try to connect pieces
                     if (IsPieceWithTrianglePlaceable(temp)) //Check if that piece can also have triangles and that triangles can fit with other pieces
@@ -203,29 +214,29 @@ public class PieceGenerator : MonoBehaviour
         return false;
     }
 
-    bool IsPieceWithTrianglePlaceable(PieceBehaviour piece)
+    bool IsPieceWithTrianglePlaceable(PieceData piece)
     {
-        int counter = 0;
-        if (IsCellsAvailable(tempCell, piece))
+        int connectedTriangleFaceCounter = 0;
+        if (IsCellsAvailable(tempCell, piece)) //Piece doesnt fit inside board
         {
-            Debug.Log(piece.id + " id " + piece.location + " loc " + piece.rotation + " rot");
             for (int i = 0; i < piece.triangleCellLocations.Count; i++)
             {
-                if (AlreadyConnectedWithPiece(piece, i))
+                if (AlreadyConnectedWithPiece(piece, i)) //This triangle face is already connected 
                 {
-                    counter++;
+                    GlobalAttributes.FillCells(tempCell, piece);
+                    connectedTriangleFaceCounter++;
                 }
                 else
                 {
                     GlobalAttributes.FillCells(tempCell, piece);
-                    if (IsItConnectsWithSelectedPiece(piece, i))
+                    if (IsItConnectsWithSelectedPiece(piece, i)) //Can this piece connect with other pieces?
                     {
-                        counter++;
+                        connectedTriangleFaceCounter++;
                     }
                 }
 
             }
-            if (counter == piece.triangleCellLocations.Count)
+            if (connectedTriangleFaceCounter == piece.triangleCellLocations.Count) //All triangle faces connected
             {
                 tempSpawnedPieces.Add(piece);
                 return true;
@@ -236,7 +247,7 @@ public class PieceGenerator : MonoBehaviour
 
     bool Crashed()
     {
-        if (loopCounter > 2000)
+        if (loopCounter > 750)
         {
             infiniteLoop = true;
             return false;
@@ -256,7 +267,7 @@ public class PieceGenerator : MonoBehaviour
         return false;
     }
 
-    bool AlreadyTried(PieceBehaviour piece)
+    bool AlreadyTried(PieceData piece)
     {
         for (int i = 0; i < pastChoices.Count - 1; i++) //Dont check last added choice
         {
@@ -271,11 +282,10 @@ public class PieceGenerator : MonoBehaviour
         if (spawnedPiece.triangleCellLocations.Count > 0)
         {
             CopyCells();
-            piecesWithTriangle = piecesWithTriangle.OrderByDescending(o => System.Guid.NewGuid()).ToList();
-            if (!IsPieceWithTrianglePlaceable(spawnedPiece))
+            piecesWithTriangle = piecesWithTriangle.OrderByDescending(o => System.Guid.NewGuid()).ToList(); //Shuffle triangle pieces list to make different connections
+            if (!IsPieceWithTrianglePlaceable(spawnedPiece)) //Can this piece connect with other triangle pieces and fit inside board?
             {
-                Debug.Log("*************");
-                tempSpawnedPieces = new List<PieceBehaviour>();
+                tempSpawnedPieces = new List<PieceData>();
                 pastChoices.Add(new PastChoices(spawnedPiece));
                 return false;
             }
@@ -283,17 +293,20 @@ public class PieceGenerator : MonoBehaviour
             {
                 if (spawnedPieces.Count + tempSpawnedPieces.Count <= boardManager.maxPieceCount)
                 {
-                    Debug.Log("Done");
-                    foreach (PieceBehaviour piece in tempSpawnedPieces)
+                    foreach (PieceData piece in tempSpawnedPieces)
                     {
                         GlobalAttributes.FillCells(cell, piece);
                         spawnedPieces.Add(piece);
                     }
                 }
-                tempSpawnedPieces = new List<PieceBehaviour>();
+                else
+                {
+                    Debug.Log("BOARD IS TOO BIG FOR THE PIECES WE CREATED");
+                }
+                tempSpawnedPieces = new List<PieceData>();
             }
         }
-        else if (!IsCellsAvailable(cell, spawnedPiece))
+        else if (!IsCellsAvailable(cell, spawnedPiece)) //We dont have to worry about connections if piece doesnt have triangles
         {
             pastChoices.Add(new PastChoices(spawnedPiece));
             return false;
@@ -301,13 +314,13 @@ public class PieceGenerator : MonoBehaviour
         return true;
     }
 
-    bool IsCellsAvailable(Cell[,] c, PieceBehaviour piece)
+    bool IsCellsAvailable(Cell[,] c, PieceData piece)
     {
         if (AlreadyTried(piece)) //We dont need to check for anything else we already tried it
         {
             return false;
         }
-        if (!GlobalAttributes.IsInsideBoard(piece, cellWidth, cellHeight))
+        if (!GlobalAttributes.IsInsideBoard(piece, cellWidth, cellHeight)) //Is piece can fit inside board borders?
         {
             return false;
         }

@@ -1,13 +1,13 @@
 ﻿using System.IO;
-using UnityEditor;
 using UnityEngine;
 
 public static class GlobalAttributes
 {
     public static int cellSectionCount = 4; //Cells splitted to sections for filling them with triangles
     public static int currentLevel = 0;
+    public static int levelDifficulty = 0;
 
-    public static void FillCells(Cell[,] cell, PieceBehaviour piece)
+    public static void FillCells(Cell[,] cell, PieceData piece)
     {
         for (int i = 0; i < piece.filledCellLocations.Count; i++)
         {
@@ -28,7 +28,7 @@ public static class GlobalAttributes
                 cell[i, j] = new Cell(new int[2] { i, j }, new Vector4(0, 0, 0, 0));
     }
 
-    public static bool IsInsideBoard(PieceBehaviour piece, int width, int height)
+    public static bool IsInsideBoard(PieceData piece, int width, int height)
     {
         for (int i = 0; i < piece.bordersOfPiece.Count; i++)
         {
@@ -58,19 +58,16 @@ public static class GlobalAttributes
         return true;
     }
 
-    public static LevelData GetLevelData()
+    public static LevelData GetLevelData() //Read json file
     {
         TextAsset targetFile = Resources.Load<TextAsset>("LevelData" + currentLevel); //Load, read and return the .json data from resources folder
         LevelData data = JsonUtility.FromJson<LevelData>(targetFile.text);
         return data;
     }
 
-    public static void SaveLevelData(LevelData level)
+    public static void SaveLevelData(LevelData level) //Save level
     {
-        string path = null;
-#if UNITY_EDITOR
-        path = "Assets/Resources/LevelData" + currentLevel + ".json";
-#endif
+        string path = "Assets/Resources/LevelData" + currentLevel + ".json";
 
         string str = JsonUtility.ToJson(level);
         using (FileStream fs = new FileStream(path, FileMode.Create))
@@ -80,8 +77,6 @@ public static class GlobalAttributes
                 writer.Write(str);
             }
         }
-#if UNITY_EDITOR
         UnityEditor.AssetDatabase.Refresh();
-#endif
     }
 }

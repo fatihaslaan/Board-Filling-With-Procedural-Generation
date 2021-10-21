@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PieceLocator : MonoBehaviour
 {
     public bool located = false;
-    public PieceBehaviour piece;
+    public PieceData pieceData;
+    public int rotation=0;
 
     Vector2 mousePosition;
     Vector3 startingPosition;
@@ -16,17 +15,19 @@ public class PieceLocator : MonoBehaviour
 
     void Start()
     {
-        piece = GetComponent<PieceBehaviour>();
+        pieceData=new PieceData(GetComponent<PieceBehaviour>());
+        pieceData.ChangeRotation(rotation); //Update piece borders
+
         board = BoardManager.GetInstance();
         board.selectedPieces.Add(this);
     }
 
-    void OnMouseDown()
+    void OnMouseDown() //To give a better drag effect
     {
         startingPosition = transform.position - Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
     }
 
-    void OnMouseDrag()
+    void OnMouseDrag() //Moving piece
     {
         mousePosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
         currentPosition = Camera.main.ScreenToWorldPoint(mousePosition) + startingPosition;
@@ -40,15 +41,15 @@ public class PieceLocator : MonoBehaviour
         {
             for (int j = 0; j < board.boardHeight; j++)
             {
-                if (Vector3.Distance(transform.position, board.GetPositionByLocation(i, j)) < 0.75f) //Piece is close to a cell
+                if (Vector3.Distance(transform.position, board.GetPositionByCoordinates(i, j)) < 0.75f) //Piece is close to a cell
                 {
-                    piece.location[0] = i;
-                    piece.location[1] = j;
-                    if (GlobalAttributes.IsInsideBoard(piece, board.boardWidth, board.boardHeight)) //Piece borders are inside board
+                    pieceData.location[0] = i;
+                    pieceData.location[1] = j;
+                    if (GlobalAttributes.IsInsideBoard(pieceData, board.boardWidth, board.boardHeight)) //Piece borders are inside board
                     {
                         located = true;
-                        transform.position = board.GetPositionByLocation(i, j);
-                        if (IsGameOver())
+                        transform.position = board.GetPositionByCoordinates(i, j);
+                        if (IsBoardFilled()) //Board is filled game is over
                         {
                             GlobalAttributes.currentLevel++;
                             Debug.Log("Game over");
@@ -61,7 +62,7 @@ public class PieceLocator : MonoBehaviour
 
     }
 
-    bool IsGameOver()
+    bool IsBoardFilled()
     {
         GlobalAttributes.EmptyCells(board.boardCells);
         board.FillCells();
