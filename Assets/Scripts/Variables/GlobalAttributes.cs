@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using UnityEngine;
+using UnityEditor;
 
 public static class GlobalAttributes
 {
@@ -60,15 +61,25 @@ public static class GlobalAttributes
 
     public static LevelData GetLevelData() //Read json file
     {
-        TextAsset targetFile = Resources.Load<TextAsset>("LevelData" + currentLevel); //Load, read and return the .json data from resources folder
-        LevelData data = JsonUtility.FromJson<LevelData>(targetFile.text);
-        return data;
+        string path = Application.dataPath + "/Resources/LevelData" + currentLevel + ".json";
+        #if UNITY_EDITOR
+            path = "Assets/Resources/LevelData" + currentLevel + ".json";
+        #endif
+        string level;
+        using (StreamReader sr = new StreamReader(path))
+        {
+            level=sr.ReadToEnd();
+        }
+        LevelData data = JsonUtility.FromJson<LevelData>(level);
+        return data;  //Return the .json data
     }
 
     public static void SaveLevelData(LevelData level) //Save level
     {
-        string path = "Assets/Resources/LevelData" + currentLevel + ".json";
-
+        string path = Application.dataPath + "/Resources/LevelData" + currentLevel + ".json";
+        #if UNITY_EDITOR
+            path = "Assets/Resources/LevelData" + currentLevel + ".json";
+        #endif
         string str = JsonUtility.ToJson(level);
         using (FileStream fs = new FileStream(path, FileMode.Create))
         {
@@ -77,6 +88,8 @@ public static class GlobalAttributes
                 writer.Write(str);
             }
         }
-        UnityEditor.AssetDatabase.Refresh();
+        #if UNITY_EDITOR
+            UnityEditor.AssetDatabase.Refresh();
+        #endif
     }
 }
